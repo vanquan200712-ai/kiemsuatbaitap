@@ -1610,14 +1610,20 @@
                 document.getElementById('headerUsername').textContent = currentUser;
                 document.getElementById('userAvatar').textContent = currentUser[0].toUpperCase();
 
-                // Cloud Load
+                // 1. Hiện dữ liệu cục bộ ngay lập tức (Instant Render)
+                renderTasks();
+
+                // 2. Chạy ngầm việc tải dữ liệu từ Cloud
                 if (typeof db !== 'undefined') {
                     try {
                         const doc = await db.collection('user_tasks').doc(currentUser).get();
                         if (doc.exists) {
-                            tasks = doc.data().tasks || [];
+                            const cloudTasks = doc.data().tasks || [];
+                            // Chỉ cập nhật nếu dữ liệu đám mây khác với dữ liệu hiện tại (hoặc luôn cập nhật để đồng bộ)
+                            tasks = cloudTasks;
                             localStorage.setItem('hw_tasks', JSON.stringify(tasks));
-                            console.log("Cloud Data Loaded for:", currentUser);
+                            renderTasks(); // Vẽ lại giao diện với dữ liệu mới từ mây
+                            console.log("Cloud Data Synced for:", currentUser);
                         }
                     } catch (e) {
                         console.error("Cloud Load Error:", e);
