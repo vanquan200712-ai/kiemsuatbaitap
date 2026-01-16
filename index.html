@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Bài Tập Do VanQuan Thiết Kế</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: rgba(20, 20, 20, 0.8);
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Removed Orbs as requested */
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #6366f1, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+        }
+
+        /* Input Form */
+        .input-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 0.8rem 1rem;
+            border-radius: 0.75rem;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+        }
+
+        button.add-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button.add-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+        }
+
+        /* Task List */
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            padding: 1.2rem 1.5rem;
+            border-radius: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .task-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+            transition: color 0.3s;
+        }
+
+        .task-info p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .task-image-preview {
+            width: 80px;
+            height: 60px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+            margin-right: 1rem;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .task-image-preview:hover {
+            transform: scale(1.1);
+        }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .image-input-label {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 0.8rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .image-input-label:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .image-input-label span {
+            font-size: 1.2rem;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-action {
+            width: 38px;
+            height: 38px;
+            border-radius: 0.5rem;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+        }
+
+        .btn-done {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .btn-done:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Status Finished */
+        .task-card.completed {
+            opacity: 0.6;
+        }
+
+        .task-card.completed .task-info h3 {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .task-card.completed .btn-done {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Empty State */
+        #empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Quản Lý Bài Tập Do VanQuan Thiết Kế</h1>
+            <div id="live-clock"
+                style="font-size: 1.2rem; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;">00:00:00</div>
+            <p id="live-date">ĐANG TẢI...</p>
+        </header>
+
+        <section class="input-card">
+            <div class="form-group">
+                <input type="text" id="taskName" placeholder="Tên bài tập..." required>
+                <input type="text" id="subject" placeholder="Môn học (Văn, Toán...)">
+                <input type="date" id="dueDate">
+                <label class="image-input-label" title="Thêm ảnh">
+                    <span>📷</span>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </label>
+                <button class="add-btn" onclick="addTask()">Thêm Bài</button>
+            </div>
+        </section>
+
+        <section id="taskList" class="list-container">
+            <!-- Bài tập sẽ hiện ở đây -->
+        </section>
+
+        <div id="empty-state" style="display: none;">
+            Bạn chưa có bài tập nào. Hãy thêm một bài ở trên nhé!
+        </div>
+    </div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('hw_tasks')) || [];
+
+        function saveAndRender() {
+            localStorage.setItem('hw_tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function addTask() {
+            const name = document.getElementById('taskName').value;
+            const subject = document.getElementById('subject').value || "Chưa phân loại";
+            const date = document.getElementById('dueDate').value || "Không có hạn";
+            const imageInput = document.getElementById('imageInput');
+            const imageFile = imageInput.files[0];
+
+            if (!name) return alert("Vui lòng nhập tên bài tập!");
+
+            const proceedWithTask = (base64Img = null) => {
+                const newTask = {
+                    id: Date.now(),
+                    name: name,
+                    subject: subject,
+                    date: date,
+                    completed: false,
+                    image: base64Img
+                };
+
+                tasks.unshift(newTask);
+                document.getElementById('taskName').value = "";
+                document.getElementById('subject').value = "";
+                document.getElementById('dueDate').value = "";
+                imageInput.value = ""; // Reset file input
+
+                saveAndRender();
+            };
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => proceedWithTask(e.target.result);
+                reader.readAsDataURL(imageFile);
+            } else {
+                proceedWithTask();
+            }
+        }
+
+        function toggleTask(id) {
+            tasks = tasks.map(task =>
+                task.id === id ? { ...task, completed: !task.completed } : task
+            );
+            saveAndRender();
+        }
+
+        function deleteTask(id) {
+            if (confirm("Bạn có chắc muốn xóa bài tập này không?")) {
+                tasks = tasks.filter(task => task.id !== id);
+                saveAndRender();
+            }
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('taskList');
+            const empty = document.getElementById('empty-state');
+
+            list.innerHTML = "";
+
+            if (tasks.length === 0) {
+                empty.style.display = "block";
+                return;
+            } else {
+                empty.style.display = "none";
+            }
+
+            tasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = `task-card ${task.completed ? 'completed' : ''}`;
+
+                const imageHtml = task.image ? `<img src="${task.image}" class="task-image-preview" onclick="window.open('${task.image}')" title="Bấm để xem ảnh lớn">` : '';
+
+                card.innerHTML = `
+                    <div class="task-left">
+                        ${imageHtml}
+                        <div class="task-info">
+                            <h3>${task.name}</h3>
+                            <p>Môn: ${task.subject} • Hạn: ${task.date}</p>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn-action btn-done" onclick="toggleTask(${task.id})" title="Hoàn thành">
+                            ✓
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deleteTask(${task.id})" title="Xóa">
+                            ✕
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function updateLiveTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('vi-VN');
+            const dateStr = now.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            document.getElementById('live-clock').textContent = timeStr;
+            document.getElementById('live-date').textContent = dateStr;
+        }
+
+        function setDefaultDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            document.getElementById('dueDate').value = `${year}-${month}-${day}`;
+        }
+
+        // Khởi tạo ban đầu
+        setInterval(updateLiveTime, 1000);
+        updateLiveTime();
+        setDefaultDate();
+        renderTasks();
+    </script>
+</body>
+
+</html>
