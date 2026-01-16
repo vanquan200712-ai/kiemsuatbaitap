@@ -93,8 +93,33 @@
 
         .form-group {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
+            grid-template-columns: 2fr 1fr 1fr;
             gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        textarea {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 0.8rem 1rem;
+            border-radius: 0.75rem;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+            grid-column: span 3;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
         }
 
         @media (max-width: 600px) {
@@ -294,6 +319,10 @@
                 <input type="text" id="taskName" placeholder="Tên bài tập..." required>
                 <input type="text" id="subject" placeholder="Môn học (Văn, Toán...)">
                 <input type="date" id="dueDate">
+                <textarea id="taskContent" placeholder="Nội dung chi tiết bài tập..."></textarea>
+            </div>
+            <div class="form-row-2">
+                <div style="flex-grow: 1;"></div>
                 <label class="image-input-label" title="Thêm ảnh">
                     <span>📷</span>
                     <input type="file" id="imageInput" accept="image/*" style="display: none;">
@@ -388,6 +417,7 @@
                 card.className = `task-card ${task.completed ? 'completed' : ''}`;
 
                 const imageHtml = task.image ? `<img src="${task.image}" class="task-image-preview" onclick="window.open('${task.image}')" title="Bấm để xem ảnh lớn">` : '';
+                const contentHtml = task.content ? `<p style="margin-top: 0.5rem; color: var(--text-dim); font-size: 0.9rem; white-space: pre-wrap;">${task.content}</p>` : '';
 
                 card.innerHTML = `
                     <div class="task-left">
@@ -395,6 +425,7 @@
                         <div class="task-info">
                             <h3>${task.name}</h3>
                             <p>Môn: ${task.subject} • Hạn: ${task.date}</p>
+                            ${contentHtml}
                         </div>
                     </div>
                     <div class="task-actions">
