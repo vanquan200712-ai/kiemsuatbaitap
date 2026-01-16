@@ -5,18 +5,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Bài Tập Do VanQuan Thiết Kế</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <style>
         :root {
             --bg-color: #050505;
-            --card-bg: rgba(20, 20, 20, 0.8);
+            --card-bg: rgba(20, 20, 20, 0.82);
             --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
             --accent-hover: #4f46e5;
             --text-primary: #ffffff;
             --text-secondary: #94a3b8;
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.08);
             --success: #10b981;
             --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        /* VIP Themes */
+        body.theme-rose {
+            --accent: #ec4899;
+            --accent-hover: #db2777;
+            --accent-glow: rgba(236, 72, 153, 0.3);
+        }
+
+        body.theme-emerald {
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --accent-glow: rgba(16, 185, 129, 0.3);
+        }
+
+        body.theme-amber {
+            --accent: #f59e0b;
+            --accent-hover: #d97706;
+            --accent-glow: rgba(245, 158, 11, 0.3);
         }
 
         * {
@@ -28,10 +51,6 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: url('background.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
             min-height: 100vh;
             color: var(--text-primary);
             padding: 2rem 1rem;
@@ -41,7 +60,19 @@
             position: relative;
         }
 
-        /* Removed Orbs as requested */
+        .bg-overlay {
+            position: fixed;
+            top: -5%;
+            left: -5%;
+            width: 110%;
+            height: 110%;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            transition: transform 0.15s ease-out;
+            pointer-events: none;
+        }
 
         .container {
             width: 100%;
@@ -93,14 +124,14 @@
 
         .form-group {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 120px 100px;
             gap: 1rem;
             margin-bottom: 1rem;
         }
 
         .form-row-2 {
-            display: grid;
-            grid-template-columns: 1fr auto auto;
+            display: flex;
+            justify-content: center;
             gap: 1rem;
             align-items: center;
         }
@@ -113,7 +144,7 @@
             color: white;
             outline: none;
             transition: border-color 0.3s;
-            grid-column: span 3;
+            grid-column: span 4;
             resize: vertical;
             min-height: 80px;
         }
@@ -246,6 +277,100 @@
             gap: 0.5rem;
         }
 
+        .search-container {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            padding: 1.2rem 1.5rem;
+            border-radius: 1.25rem;
+            color: white;
+            outline: none;
+            backdrop-filter: blur(15px);
+            transition: 0.3s;
+            font-size: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-star {
+            background: rgba(234, 179, 8, 0.1);
+            color: #eab308;
+            font-size: 1.2rem;
+        }
+
+        .btn-star.active {
+            background: #eab308;
+            color: black;
+        }
+
+        .task-card.starred {
+            border: 1px solid rgba(234, 179, 8, 0.5);
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.15);
+            background: rgba(30, 25, 10, 0.85);
+        }
+
+        /* Dashboard Stats */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: 1.25rem;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-container {
+            grid-column: span 3;
+            background: rgba(255, 255, 255, 0.05);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), #ec4899);
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+
         .btn-action {
             width: 38px;
             height: 38px;
@@ -302,45 +427,1321 @@
             font-weight: 600;
             font-style: italic;
         }
+
+        /* VIP Ultimate Elements */
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .quote-container {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-style: italic;
+            opacity: 0.8;
+            font-size: 0.95rem;
+            color: var(--accent);
+            animation: pulse 4s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Task Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            padding: 2.5rem;
+            border-radius: 2rem;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 0 50px rgba(99, 102, 241, 0.2);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Tabs System */
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 0.8rem 2rem;
+            border-radius: 2rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Guide Section Styling */
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            padding: 2.5rem;
+            border-radius: 2rem;
+            line-height: 1.8;
+        }
+
+        .guide-item {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .guide-item h3 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .guide-step {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Welcome Overlay */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 30000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: 0.8s ease;
+        }
+
+        .welcome-content {
+            padding: 3rem;
+            max-width: 600px;
+            animation: welcomePop 1s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+
+        @keyframes welcomePop {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .welcome-content h2 {
+            font-size: 1.5rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-start {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 3rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-start:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 50px rgba(99, 102, 241, 0.6);
+            background: white;
+            color: var(--accent);
+        }
+
+        /* Pomodoro & Extra Tools */
+        .pomodoro-card {
+            background: var(--card-bg);
+            border: 1px solid var(--accent-glow);
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .pomo-time {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: monospace;
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-glow);
+            margin-bottom: 0.5rem;
+        }
+
+        .pomo-presets {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .preset-btn {
+            font-size: 0.75rem !important;
+            padding: 0.3rem 0.6rem !important;
+            opacity: 0.7;
+        }
+
+        .preset-btn.active {
+            opacity: 1;
+            background: var(--accent) !important;
+        }
+
+        .pomo-controls button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            margin: 0 0.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .pomo-controls button:hover {
+            background: var(--accent);
+        }
+
+        .badge-urgent {
+            background: #ef4444;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .theme-dot {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: 0.3s;
+        }
+
+        .theme-dot:hover {
+            transform: scale(1.2);
+        }
+
+        .backup-tools {
+
+            .admin-table th,
+            .admin-table td {
+                padding: 1.2rem;
+                text-align: left;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .admin-table th {
+                background: rgba(255, 255, 255, 0.05);
+                color: var(--accent);
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                letter-spacing: 1px;
+            }
+
+            .admin-table tr:hover {
+                background: rgba(255, 255, 255, 0.02);
+            }
+
+            .role-badge {
+                padding: 0.2rem 0.6rem;
+                border-radius: 0.5rem;
+                font-size: 0.7rem;
+                font-weight: 700;
+            }
+
+            .role-admin {
+                background: var(--accent);
+                color: white;
+            }
+
+            .role-user {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text-secondary);
+            }
+
+            .btn-delete-user {
+                background: rgba(239, 68, 68, 0.1);
+                color: var(--danger);
+                border: 1px solid var(--danger);
+                padding: 0.4rem 0.8rem;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+
+            .btn-delete-user:hover {
+                background: var(--danger);
+                color: white;
+            }
+        }
+
+        /* Auth Portal */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            z-index: 20000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 2.5rem;
+            width: calc(100% - 2rem);
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: welcomePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .auth-card h2 {
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-input {
+            width: 100%;
+            display: block;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 1rem 1.2rem;
+            border-radius: 1rem;
+            color: white;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: 0.3s;
+            text-align: left;
+        }
+
+        .auth-input:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .auth-toggle {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .auth-toggle span {
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .password-wrapper .auth-input {
+            margin-bottom: 0;
+            padding-right: 3.5rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: 0.3s;
+            user-select: none;
+            z-index: 5;
+        }
+
+        .toggle-password:hover {
+            color: var(--accent);
+        }
+
+        /* User Profile VIP */
+        .user-profile {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 5rem;
+            z-index: 15000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-left: 3px solid var(--accent);
+        }
+
+        .user-profile:hover {
+            background: rgba(30, 30, 30, 0.8);
+            transform: scale(1.05) translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        #headerUsername {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            cursor: pointer;
+            padding: 0;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            letter-spacing: 1.5px;
+        }
+
+        @media (max-width: 600px) {
+            .user-profile {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+            }
+
+            #headerUsername {
+                display: none;
+            }
+
+            .user-profile:hover #headerUsername {
+                display: block;
+            }
+        }
+
+        /* Music Toggle VIP */
+        .music-control {
+            position: fixed;
+            top: 6rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 15000;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .music-control:hover {
+            transform: scale(1.1);
+            background: rgba(40, 40, 40, 0.8);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .music-control.playing {
+            border-color: var(--accent);
+            animation: pulse-music 2s infinite;
+        }
+
+        @keyframes pulse-music {
+            0% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+            }
+        }
+
+        .music-waves {
+            display: none;
+            gap: 2px;
+            align-items: flex-end;
+            height: 12px;
+            margin-left: 2px;
+        }
+
+        .playing .music-waves {
+            display: flex;
+        }
+
+        .music-waves span {
+            width: 2px;
+            background: var(--accent);
+            border-radius: 1px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .music-waves span:nth-child(2) {
+            height: 100%;
+            animation-delay: 0.2s;
+        }
+
+        .music-waves span:nth-child(1) {
+            height: 60%;
+            animation-delay: 0.1s;
+        }
+
+        .music-waves span:nth-child(3) {
+            height: 80%;
+            animation-delay: 0.3s;
+        }
+
+        @keyframes wave {
+
+            0%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            50% {
+                transform: scaleY(0.4);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .music-control {
+                top: 5rem;
+                right: 1.2rem;
+                width: 40px;
+                height: 40px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <!-- Auth Portal -->
+    <div id="authPortal" class="auth-overlay" style="display: none;">
+        <div class="auth-card" id="loginForm">
+            <h2>Đăng Nhập VIP</h2>
+            <input type="text" id="loginUser" class="auth-input" placeholder="Tên đăng nhập...">
+            <div class="password-wrapper">
+                <input type="password" id="loginPass" class="auth-input" placeholder="Mật khẩu...">
+                <span class="toggle-password" onclick="togglePassword('loginPass', this)">👁️</span>
+            </div>
+            <div style="text-align: right; margin-bottom: 1.5rem; margin-top: -0.5rem;">
+                <span
+                    style="color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; text-decoration: underline;"
+                    onclick="toggleAuth('forgot')">Quên mật khẩu?</span>
+            </div>
+            <button class="btn-start" style="width: 100%;" onclick="handleLogin()">Đăng Nhập</button>
+            <div class="auth-toggle">Chưa có tài khoản? <span onclick="toggleAuth('register')">Đăng ký ngay</span></div>
+        </div>
+        <div class="auth-card" id="registerForm" style="display: none;">
+            <h2>Đăng Ký Thành Viên</h2>
+            <input type="text" id="regUser" class="auth-input" placeholder="Tên đăng nhập...">
+            <input type="email" id="regEmail" class="auth-input" placeholder="Email nhận mã bảo mật...">
+            <div class="password-wrapper">
+                <input type="password" id="regPass" class="auth-input" placeholder="Mật khẩu bảo mật...">
+                <span class="toggle-password" onclick="togglePassword('regPass', this)">👁️</span>
+            </div>
+            <div class="password-wrapper">
+                <input type="password" id="regConfirmPass" class="auth-input" placeholder="Xác nhận lại mật khẩu...">
+                <span class="toggle-password" onclick="togglePassword('regConfirmPass', this)">👁️</span>
+            </div>
+            <button class="btn-start" style="width: 100%;" onclick="handleRegister()">Tạo Tài Khoản</button>
+            <div class="auth-toggle">Đã có tài khoản? <span onclick="toggleAuth('login')">Quay lại Đăng nhập</span>
+            </div>
+        </div>
+        <div class="auth-card" id="forgotForm" style="display: none;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🔑</div>
+            <h2>Khôi Phục Mật Khẩu</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                Nhập Email bạn đã dùng để đăng ký tài khoản.
+            </p>
+            <input type="email" id="forgotEmail" class="auth-input" placeholder="Email của bạn...">
+            <button class="btn-start" style="width: 100%;" onclick="handleForgotPassword()">Gửi Mã Xác Thực</button>
+            <div class="auth-toggle" onclick="toggleAuth('login')"><span>Quay lại Đăng nhập</span></div>
+        </div>
+        <div class="auth-card" id="resetForm" style="display: none;">
+            <h2>Đặt Lại Mật Khẩu</h2>
+            <div class="password-wrapper">
+                <input type="password" id="newPass" class="auth-input" placeholder="Mật khẩu mới...">
+                <span class="toggle-password" onclick="togglePassword('newPass', this)">👁️</span>
+            </div>
+            <div class="password-wrapper">
+                <input type="password" id="confirmNewPass" class="auth-input" placeholder="Xác nhận mật khẩu mới...">
+                <span class="toggle-password" onclick="togglePassword('confirmNewPass', this)">👁️</span>
+            </div>
+            <button class="btn-start" style="width: 100%;" onclick="handleResetPassword()">Cập Nhật Mật Khẩu</button>
+        </div>
+        <div class="auth-card" id="verifyForm" style="display: none;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+            <h2>Xác Thực Bảo Mật</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;" id="verifyMsg">
+                Mã xác thực đã được gửi đến email của bạn.
+            </p>
+            <input type="text" id="otpInput" class="auth-input" placeholder="Nhập mã 6 chữ số..." maxlength="6"
+                style="text-align: center; letter-spacing: 5px; font-weight: 700;">
+            <button class="btn-start" style="width: 100%;" onclick="confirmOTP()">Xác Nhận</button>
+            <div class="auth-toggle">Cảnh báo: Đây là dự án bảo mật VIP của Quân</div>
+        </div>
+    </div>
+
+    <!-- Welcome Overlay -->
+    <div id="welcomeOverlay" class="welcome-overlay" style="display: none;">
+        <div class="welcome-content">
+            <h2>🎉 Dự Án Đầu Tay</h2>
+            <h1>Chào mừng bạn đến với dự án đầu tiên của Nguyễn Văn Quân</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 3rem; line-height: 1.6;">
+                Khám phá ứng dụng quản lý bài tập đẳng cấp VIP với những tính năng độc bản và giao diện siêu hiện thực.
+            </p>
+            <button class="btn-start" onclick="closeWelcome()">Khám Phá Ngay</button>
+        </div>
+    </div>
+
+    <div id="particles-js"></div>
+    <div class="bg-overlay" id="bgLayer"></div>
+
+    <div class="user-profile" id="userHeader" style="display: none;" title="Quản lý tài khoản VIP">
+        <div class="avatar" id="userAvatar">Q</div>
+        <div class="user-info">
+            <span id="headerUsername">Nguyễn Văn Quân</span>
+            <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
+        </div>
+    </div>
+
+    <!-- Music Toggle VIP -->
+    <div class="music-control" id="musicToggle" onclick="toggleMusic()" title="Bật/Tắt nhạc Lofi Chill">
+        <span id="musicIcon">🔇</span>
+        <div class="music-waves">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+    <audio id="bgMusic" loop onplay="console.log('Music started playing')" onerror="handleAudioError()">
+        <source src="https://www.chosic.com/wp-content/uploads/2021/04/Lofi-Chill.mp3" type="audio/mpeg">
+        <source src="https://pixabay.com/vi/music/nh%e1%bb%8bp-%c4%91%e1%ba%adp-lofi-chill-372954/" type="audio/mpeg">
+    </audio>
+
+    <script>
+        function handleAudioError() {
+            console.error("Không thể tải nhạc nền lofi.");
+            // Silent fail or alert for debugging if needed
+        }
+    </script>
+
+    <div class="container" id="mainApp">
         <header>
+            <p id="greeting-text"
+                style="color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; margin-bottom: 0.5rem;">
+            </p>
             <h1>Quản Lý Bài Tập Do VanQuan Thiết Kế</h1>
             <div id="live-clock"
-                style="font-size: 1.2rem; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;">00:00:00</div>
-            <p id="live-date">ĐANG TẢI...</p>
+                style="font-size: 1.5rem; color: #fff; font-weight: 700; margin-bottom: 0.2rem; text-shadow: 0 0 15px rgba(99, 102, 241, 0.5);">
+                00:00:00</div>
+            <p id="live-date" style="font-size: 1rem; opacity: 0.8; margin-bottom: 1.5rem;">ĐANG TẢI...</p>
         </header>
 
-        <section class="input-card">
-            <div class="form-group">
-                <input type="text" id="taskName" placeholder="Tên bài tập..." required>
-                <input type="text" id="subject" placeholder="Môn học (Văn, Toán...)">
-                <input type="date" id="dueDate">
-                <textarea id="taskContent" placeholder="Nội dung chi tiết bài tập..."></textarea>
-            </div>
-            <div class="form-row-2">
-                <div style="flex-grow: 1;"></div>
-                <label class="image-input-label" title="Thêm ảnh">
-                    <span>📷</span>
-                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                </label>
-                <button class="add-btn" onclick="addTask()">Thêm Bài</button>
-            </div>
-        </section>
+        <div class="quote-container" id="quote-display">
+            "Học tập là hạt giống của kiến thức, kiến thức là hạt giống của hạnh phúc."
+        </div>
 
-        <section id="taskList" class="list-container">
-            <!-- Bài tập sẽ hiện ở đây -->
-        </section>
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('manager')">📋 Quản Lý</button>
+            <button class="tab-btn" onclick="switchTab('guide')">📖 Hướng Dẫn</button>
+            <button class="tab-btn" id="adminTabBtn" style="display: none;" onclick="switchTab('admin')">⚙️ Quản
+                Trị</button>
+        </nav>
 
-        <div id="empty-state" style="display: none;">
-            Bạn chưa có bài tập nào. Hãy thêm một bài ở trên nhé!
+        <div id="manager-tab" class="tab-content active">
+            <section class="pomodoro-card">
+                <div style="text-align: center;">
+                    <span
+                        style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Pomodoro
+                        Focus</span>
+                    <div class="pomo-presets">
+                        <button class="tab-btn preset-btn active" onclick="setPomoDuration(25, this)">25p</button>
+                        <button class="tab-btn preset-btn" onclick="setPomoDuration(45, this)">45p</button>
+                        <button class="tab-btn preset-btn" onclick="setPomoDuration(60, this)">60p</button>
+                        <input type="number" id="customPomo" placeholder="Phút..."
+                            style="width: 70px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white; border-radius: 0.5rem; padding: 2px 8px; font-size: 0.8rem;"
+                            oninput="setPomoDuration(this.value, null)">
+                    </div>
+                    <div class="pomo-time" id="pomoDisplay">25:00</div>
+                    <div class="pomo-controls">
+                        <button onclick="togglePomo()" id="pomoStartBtn">BẮT ĐẦU</button>
+                        <button onclick="resetPomo()">RESET</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="input-card">
+                <div class="form-group">
+                    <input type="text" id="taskName" placeholder="Tên bài tập..." required>
+                    <input type="text" id="subject" placeholder="Môn học (Văn, Toán...)">
+                    <input type="date" id="dueDate">
+                    <input type="time" id="dueTime">
+                    <textarea id="taskContent" placeholder="Nội dung chi tiết bài tập..."></textarea>
+                </div>
+                <div class="form-row-2">
+                    <label class="image-input-label" title="Thêm ảnh">
+                        <span>📷</span>
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    </label>
+                    <button class="add-btn" onclick="addTask()">Thêm Bài</button>
+                </div>
+            </section>
+
+            <section class="dashboard-grid" id="stats-section">
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total">0</span>
+                    <span class="stat-label">Tổng bài</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-done" style="color: var(--success);">0</span>
+                    <span class="stat-label">Hoàn thành</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-percent" style="color: var(--accent);">0%</span>
+                    <span class="stat-label">Tiến độ</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="main-progress"></div>
+                </div>
+            </section>
+
+            <section class="search-container">
+                <input type="text" id="searchInput" class="search-input"
+                    placeholder="🔍 Tìm kiếm bài tập hoặc môn học..." oninput="renderTasks()">
+            </section>
+
+            <section id="taskList" class="list-container">
+                <!-- Bài tập sẽ hiện ở đây -->
+            </section>
+
+            <div id="empty-state" style="display: none;">
+                Bạn chưa có bài tập nào. Hãy thêm một bài ở trên nhé!
+            </div>
+        </div>
+
+        <div id="guide-tab" class="tab-content">
+            <section class="guide-card">
+                <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2rem;">📖 Hướng Dẫn Sử Dụng VIP</h2>
+
+                <div class="guide-item">
+                    <h3>⚡ Thêm Bài Tập Nhanh</h3>
+                    <p>Nhập tên bài tập, môn học và chọn ngày hạn. Bạn có thể thêm nội dung chi tiết hoặc đính kèm ảnh
+                        bằng cách bấm vào biểu tượng 📷.</p>
+                </div>
+
+                <div class="guide-item">
+                    <h3>⭐ Chế Độ Ưu Tiên (Star)</h3>
+                    <p>Bấm vào biểu tượng ngôi sao để đưa bài tập đó lên vị trí đầu tiên. Những bài được gắn sao sẽ có
+                        hiệu ứng tỏa sáng đặc biệt để bạn không bao giờ bỏ lỡ.</p>
+                </div>
+
+                <div class="guide-item">
+                    <h3>📊 Theo Dõi Tiến Độ</h3>
+                    <div class="guide-grid">
+                        <div class="guide-step">
+                            <strong>Tổng bài:</strong> Đếm tất cả nhiệm vụ bạn đã tạo.
+                        </div>
+                        <div class="guide-step">
+                            <strong>Hoàn thành:</strong> Số nhiệm vụ đã được đánh dấu xong.
+                        </div>
+                        <div class="guide-step">
+                            <strong>Tiến độ:</strong> Thanh phần trăm tự động cập nhật tâm trạng học tập của bạn.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-item">
+                    <h3>🔍 Tìm Kiếm Thông Minh</h3>
+                    <p>Sử dụng thanh tìm kiếm để lọc bài tập theo Tên hoặc Môn học ngay lập tức. Danh sách sẽ tự động
+                        thu nhỏ theo ý bạn muốn.</p>
+                </div>
+
+                <div class="guide-item" style="border-bottom: none;">
+                    <h3>🖱️ Tương Tác VIP</h3>
+                    <ul>
+                        <li><strong>Click vào bài tập:</strong> Mở cửa sổ Focus xem chi tiết nội dung và ảnh lớn.</li>
+                        <li><strong>Pháo hoa:</strong> Bắn tung tóe mỗi khi bạn hoàn thành một bài tập!</li>
+                        <li><strong>Âm thanh:</strong> Tương tác sống động với phản hồi âm thanh cao cấp.</li>
+                    </ul>
+                </div>
+            </section>
+            <!-- Adding Theme Selector and Backup to the end of Guide or separate footer -->
+            <section class="guide-card" style="margin-top: 2rem; text-align: center;">
+                <h3>🎨 Tùy Chỉnh Giao Diện VIP</h3>
+                <div class="theme-selector">
+                    <div class="theme-dot" style="background: #6366f1;" onclick="setTheme('default')"
+                        title="Indigo Neon"></div>
+                    <div class="theme-dot" style="background: #ec4899;" onclick="setTheme('rose')" title="Rose Gold">
+                    </div>
+                    <div class="theme-dot" style="background: #10b981;" onclick="setTheme('emerald')"
+                        title="Emerald Green"></div>
+                    <div class="theme-dot" style="background: #f59e0b;" onclick="setTheme('amber')" title="Royal Gold">
+                    </div>
+                </div>
+
+                <div class="backup-tools"
+                    style="margin-top: 2rem; border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+                    <button class="btn-link" onclick="exportData()">💾 Sao lưu dữ liệu (Export)</button>
+                    <button class="btn-link" onclick="document.getElementById('importFile').click()">📂 Khôi phục dữ
+                        liệu (Import)</button>
+                    <input type="file" id="importFile" style="display: none;" onchange="importData(event)">
+                </div>
+            </section>
+        </div>
+
+        <div id="admin-tab" class="tab-content">
+            <section class="guide-card">
+                <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2rem;">⚙️ Hệ Thống Quản Trị Tối Cao</h2>
+                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
+                    Chào Admin <strong>Nguyễn Văn Quân</strong>, bên dưới là danh sách toàn bộ người dùng trong hệ
+                    thống.
+                </p>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Người dùng</th>
+                                <th>Email</th>
+                                <th>Quyền hạn</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userListBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+    <!-- Modal Xem Chi Tiết -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
         </div>
     </div>
 
     <script>
+        // Authentication Logic
+        let users = JSON.parse(localStorage.getItem('hw_users')) || [];
+
+        // Seed Admin Account if not exists
+        if (!users.find(u => u.username === 'admin')) {
+            users.push({
+                username: 'admin',
+                password: 'admin123',
+                email: 'admin@viquan.vip',
+                role: 'admin'
+            });
+            localStorage.setItem('hw_users', JSON.stringify(users));
+        }
+
+        let currentUser = sessionStorage.getItem('current_user');
+        let recoveryUser = null; // To track user being reset
+        let recoveryMode = false; // Is the OTP for login or reset?
+
+        let isMusicPlaying = localStorage.getItem('music_enabled') === 'true';
+        const bgMusic = document.getElementById('bgMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        const musicIcon = document.getElementById('musicIcon');
+
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicIcon.textContent = '🔇';
+                musicToggle.classList.remove('playing');
+                isMusicPlaying = false;
+            } else {
+                bgMusic.play().catch(e => console.log("Audio play blocked: ", e));
+                musicIcon.textContent = '🎵';
+                musicToggle.classList.add('playing');
+                isMusicPlaying = true;
+            }
+            localStorage.setItem('music_enabled', isMusicPlaying);
+            playSound('click');
+        }
+
+        // Auto-play if enabled (handling browser constraints)
+        window.addEventListener('click', () => {
+            if (isMusicPlaying && bgMusic.paused) {
+                bgMusic.play().catch(() => { });
+                musicIcon.textContent = '🎵';
+                musicToggle.classList.add('playing');
+            }
+        }, { once: true });
+
+        if (isMusicPlaying) {
+            musicIcon.textContent = '🎵';
+            musicToggle.classList.add('playing');
+        }
+
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                icon.textContent = '👁️';
+            }
+            playSound('click');
+        }
+
+        function toggleAuth(mode) {
+            playSound('click');
+            const forms = ['loginForm', 'registerForm', 'forgotForm', 'resetForm', 'verifyForm'];
+            forms.forEach(f => document.getElementById(f).style.display = 'none');
+
+            if (mode === 'register') document.getElementById('registerForm').style.display = 'block';
+            else if (mode === 'forgot') document.getElementById('forgotForm').style.display = 'block';
+            else if (mode === 'reset') document.getElementById('resetForm').style.display = 'block';
+            else if (mode === 'login') document.getElementById('loginForm').style.display = 'block';
+        }
+
+        function handleRegister() {
+            const user = document.getElementById('regUser').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            const confirmPass = document.getElementById('regConfirmPass').value.trim();
+
+            if (!user || !email || !pass || !confirmPass) return alert("Vui lòng nhập đủ các trường thông tin!");
+
+            if (pass !== confirmPass) return alert("❌ Mật khẩu xác nhận không trùng khớp!");
+
+            if (users.find(u => u.username === user)) return alert("Tên tài khoản này đã có người dùng!");
+
+            users.push({
+                username: user,
+                password: pass,
+                email: email,
+                role: 'user'
+            }); // Default role to 'user'
+            localStorage.setItem('hw_users', JSON.stringify(users));
+            playSound('success');
+            alert("✨ Đăng ký thành công! Hãy dùng tài khoản này để đăng nhập.");
+            toggleAuth('login');
+        }
+
+        let currentOTP = "";
+        let pendingUser = null;
+
+        function handleForgotPassword() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            const user = users.find(u => u.email === email);
+
+            if (!user) return alert("❌ Email này chưa được đăng ký trong hệ thống!");
+
+            playSound('success');
+            recoveryUser = user.username;
+            recoveryMode = true;
+            currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+            document.getElementById('forgotForm').style.display = 'none';
+            document.getElementById('verifyForm').style.display = 'block';
+            document.getElementById('verifyMsg').innerHTML = `Mã khôi phục đã được gửi tới:<br><strong style="color:var(--accent)">${email}</strong><br>(Mã demo: <span style="cursor:pointer" onclick="alert('Mã của bạn là: ' + currentOTP)">${currentOTP}</span>)`;
+        }
+
+        function handleResetPassword() {
+            const pass = document.getElementById('newPass').value;
+            const confirm = document.getElementById('confirmNewPass').value;
+
+            if (!pass || pass !== confirm) return alert("❌ Mật khẩu mới không trùng khớp hoặc trống!");
+
+            users = users.map(u => u.username === recoveryUser ? {
+                ...u,
+                password: pass
+            } : u);
+            localStorage.setItem('hw_users', JSON.stringify(users));
+            playSound('success');
+            alert("✅ Đã cập nhật mật khẩu mới! Bạn có thể đăng nhập ngay.");
+            toggleAuth('login');
+        }
+
+        function handleLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+
+            const found = users.find(u => u.username === user && u.password === pass);
+            if (found) {
+                // Bước xác thực 2 lớp giả lập
+                playSound('success');
+                pendingUser = user;
+                recoveryMode = false;
+                currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('verifyForm').style.display = 'block';
+                document.getElementById('verifyMsg').innerHTML = `Mã bảo mật đã được gửi tới:<br><strong style="color:var(--accent)">${found.email}</strong><br>(Mã demo: <span style="cursor:pointer" onclick="alert('Mã của bạn là: ' + currentOTP)">${currentOTP}</span>)`;
+
+                alert(`🛡️ [BẢO MẬT] Một mã xác thực (${currentOTP}) đã được gửi đến email ${found.email}. Hãy nhập mã để tiếp tục.`);
+            } else {
+                alert("❌ Sai tên đăng nhập hoặc mật khẩu!");
+            }
+        }
+
+        function confirmOTP() {
+            const input = document.getElementById('otpInput').value.trim();
+            if (input === currentOTP) {
+                playSound('success');
+                document.getElementById('otpInput').value = "";
+
+                if (recoveryMode) {
+                    document.getElementById('verifyForm').style.display = 'none';
+                    document.getElementById('resetForm').style.display = 'block';
+                } else {
+                    sessionStorage.setItem('current_user', pendingUser);
+                    currentUser = pendingUser;
+                    initApp();
+                    // Reset form xác thực
+                    document.getElementById('verifyForm').style.display = 'none';
+                }
+            } else {
+                alert("❌ Mã xác thực không chính xác. Vui lòng kiểm tra lại!");
+            }
+        }
+
+        function handleLogout() {
+            playSound('delete');
+            sessionStorage.removeItem('current_user');
+            location.reload();
+        }
+
+        function initApp() {
+            if (!currentUser) {
+                document.getElementById('authPortal').style.display = 'flex';
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('verifyForm').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('userHeader').style.display = 'none';
+            } else {
+                document.getElementById('authPortal').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('userHeader').style.display = 'flex';
+                document.getElementById('headerUsername').textContent = currentUser;
+                document.getElementById('userAvatar').textContent = currentUser[0].toUpperCase();
+
+                // Admin specific logic
+                const userObj = users.find(u => u.username === currentUser);
+                if (userObj && userObj.role === 'admin') {
+                    document.getElementById('adminTabBtn').style.display = 'block';
+                    renderUsers();
+                } else {
+                    document.getElementById('adminTabBtn').style.display = 'none';
+                }
+
+                renderTasks();
+            }
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('userListBody');
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.email}</td>
+                    <td><span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role === 'admin' ? 'ADMIN' : 'USER'}</span></td>
+                    <td>
+                        ${u.role !== 'admin' ? `<button class="btn-delete-user" onclick="deleteUser('${u.username}')">Xóa</button>` : '---'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteUser(username) {
+            if (confirm(`Bạn có chắc muốn xóa vĩnh viễn tài khoản "${username}" không?`)) {
+                playSound('delete');
+                users = users.filter(u => u.username !== username);
+                localStorage.setItem('hw_users', JSON.stringify(users));
+                renderUsers();
+                alert(`✅ Đã xóa tài khoản "${username}" thành công.`);
+            }
+        }
+
+        // Legendary Tools Logic
+        let pomoMinutes = 25;
+        let pomoSeconds = 0;
+        let isPomoRunning = false;
+        let basePomoMinutes = 25;
+        let pomoInterval;
+
+        function setPomoDuration(mins, btn) {
+            playSound('click');
+            const newMins = parseInt(mins);
+            if (isNaN(newMins) || newMins <= 0) {
+                // alert("Vui lòng nhập số phút hợp lệ cho Pomodoro."); // Removed alert for better UX on input
+                return;
+            }
+            basePomoMinutes = newMins;
+            resetPomo();
+
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            if (btn) {
+                btn.classList.add('active');
+                document.getElementById('customPomo').value = ''; // Clear custom input if a preset is clicked
+            } else {
+                // If custom input was used, ensure no preset button is active
+                // and potentially highlight the custom input or indicate it's active
+            }
+        }
+
+        function togglePomo() {
+            playSound('click');
+            if (isPomoRunning) {
+                clearInterval(pomoInterval);
+                document.getElementById('pomoStartBtn').textContent = "TIẾP TỤC";
+            } else {
+                pomoInterval = setInterval(updatePomo, 1000);
+                document.getElementById('pomoStartBtn').textContent = "TẠM DỪNG";
+            }
+            isPomoRunning = !isPomoRunning;
+        }
+
+        function resetPomo() {
+            playSound('click');
+            clearInterval(pomoInterval);
+            isPomoRunning = false;
+            pomoMinutes = basePomoMinutes;
+            pomoSeconds = 0;
+            const m = String(pomoMinutes).padStart(2, '0');
+            document.getElementById('pomoDisplay').textContent = `${m}:00`;
+            document.getElementById('pomoStartBtn').textContent = "BẮT ĐẦU";
+        }
+
+        function updatePomo() {
+            if (pomoSeconds === 0) {
+                if (pomoMinutes === 0) {
+                    clearInterval(pomoInterval);
+                    playSound('success');
+                    alert("🕒 Hết thời gian tập trung! Hãy nghỉ ngơi một lát.");
+                    resetPomo();
+                    return;
+                }
+                pomoMinutes--;
+                pomoSeconds = 59;
+            } else {
+                pomoSeconds--;
+            }
+            const m = String(pomoMinutes).padStart(2, '0');
+            const s = String(pomoSeconds).padStart(2, '0');
+            document.getElementById('pomoDisplay').textContent = `${m}:${s}`;
+        }
+
+        function setTheme(theme) {
+            playSound('click');
+            document.body.className = theme === 'default' ? '' : `theme-${theme}`;
+            localStorage.setItem('hw_theme', theme);
+        }
+
+        function exportData() {
+            playSound('click');
+            const blob = new Blob([JSON.stringify(tasks)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `VanQuan_Homework_Backup_${new Date().toLocaleDateString()}.json`;
+            a.click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                tasks = JSON.parse(e.target.result);
+                saveAndRender();
+                playSound('success');
+                alert("📂 Đã khôi phục dữ liệu thành công!");
+            };
+            reader.readAsText(file);
+        }
+
+        // Âm thanh VIP
+        const sounds = {
+            click: new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'),
+            success: new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'),
+            delete: new Audio('https://assets.mixkit.co/active_storage/sfx/2619/2619-preview.mp3')
+        };
+        sounds.click.volume = 0.3;
+        sounds.success.volume = 0.4;
+        sounds.delete.volume = 0.3;
+
+        function playSound(type) {
+            sounds[type].currentTime = 0;
+            sounds[type].play().catch(() => { });
+        }
         let tasks = JSON.parse(localStorage.getItem('hw_tasks')) || [];
 
         function saveAndRender() {
@@ -349,9 +1750,12 @@
         }
 
         function addTask() {
+            playSound('click');
             const name = document.getElementById('taskName').value;
             const subject = document.getElementById('subject').value || "Chưa phân loại";
             const date = document.getElementById('dueDate').value || "Không có hạn";
+            const time = document.getElementById('dueTime').value || ""; // Get time value
+            const content = document.getElementById('taskContent').value;
             const imageInput = document.getElementById('imageInput');
             const imageFile = imageInput.files[0];
 
@@ -363,7 +1767,10 @@
                     name: name,
                     subject: subject,
                     date: date,
+                    time: time, // Add time to the task object
+                    content: content,
                     completed: false,
+                    starred: false,
                     image: base64Img
                 };
 
@@ -371,6 +1778,8 @@
                 document.getElementById('taskName').value = "";
                 document.getElementById('subject').value = "";
                 document.getElementById('dueDate').value = "";
+                document.getElementById('dueTime').value = ""; // Clear time input
+                document.getElementById('taskContent').value = "";
                 imageInput.value = ""; // Reset file input
 
                 saveAndRender();
@@ -386,14 +1795,36 @@
         }
 
         function toggleTask(id) {
+            tasks = tasks.map(task => {
+                if (task.id === id) {
+                    const willComplete = !task.completed;
+                    if (willComplete) {
+                        playSound('success');
+                        // Hiệu ứng pháo hoa Elite
+                        confetti({
+                            particleCount: 150,
+                            spread: 70,
+                            origin: { y: 0.6 },
+                            colors: ['#6366f1', '#ec4899', '#ffffff']
+                        });
+                    }
+                    return { ...task, completed: willComplete };
+                }
+                return task;
+            });
+            saveAndRender();
+        }
+
+        function toggleStar(id) {
             tasks = tasks.map(task =>
-                task.id === id ? { ...task, completed: !task.completed } : task
+                task.id === id ? { ...task, starred: !task.starred } : task
             );
             saveAndRender();
         }
 
         function deleteTask(id) {
             if (confirm("Bạn có chắc muốn xóa bài tập này không?")) {
+                playSound('delete');
                 tasks = tasks.filter(task => task.id !== id);
                 saveAndRender();
             }
@@ -402,43 +1833,84 @@
         function renderTasks() {
             const list = document.getElementById('taskList');
             const empty = document.getElementById('empty-state');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
 
             list.innerHTML = "";
 
-            if (tasks.length === 0) {
+            let filteredTasks = tasks.filter(task =>
+                task.name.toLowerCase().includes(searchQuery) ||
+                task.subject.toLowerCase().includes(searchQuery)
+            );
+
+            // Sắp xếp: Gắn sao lên đầu, rồi đến bài mới nhất
+            filteredTasks.sort((a, b) => {
+                if (a.starred === b.starred) return 0;
+                return a.starred ? -1 : 1;
+            });
+
+            if (filteredTasks.length === 0) {
                 empty.style.display = "block";
+                empty.textContent = searchQuery ? "Không tìm thấy bài tập nào khớp với từ khóa." : "Bạn chưa có bài tập nào. Hãy thêm một bài ở trên nhé!";
                 return;
             } else {
                 empty.style.display = "none";
             }
 
-            tasks.forEach(task => {
+            filteredTasks.forEach((task, index) => {
                 const card = document.createElement('div');
-                card.className = `task-card ${task.completed ? 'completed' : ''}`;
+                card.className = `task-card ${task.completed ? 'completed' : ''} ${task.starred ? 'starred' : ''}`;
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                // Logic Khẩn Cấp
+                let urgentHtml = "";
+                const today = new Date();
+                const taskDate = new Date(task.date);
+                const diffTime = taskDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (!task.completed && diffDays >= 0 && diffDays <= 1) {
+                    urgentHtml = `<span class="badge-urgent">KHẨN CẤP</span>`;
+                }
 
                 const imageHtml = task.image ? `<img src="${task.image}" class="task-image-preview" onclick="window.open('${task.image}')" title="Bấm để xem ảnh lớn">` : '';
                 const contentHtml = task.content ? `<p style="margin-top: 0.5rem; color: var(--text-dim); font-size: 0.9rem; white-space: pre-wrap;">${task.content}</p>` : '';
 
                 card.innerHTML = `
-                    <div class="task-left">
+                    <div class="task-left" onclick="showModal(${task.id})">
                         ${imageHtml}
                         <div class="task-info">
-                            <h3>${task.name}</h3>
-                            <p>Môn: ${task.subject} • Hạn: ${task.date}</p>
+                            <h3>${task.starred ? '⭐ ' : ''}${task.name} ${urgentHtml}</h3>
+                            <p>Môn: ${task.subject} • Hạn: ${task.date} ${task.time ? `(${task.time})` : ''}</p>
                             ${contentHtml}
                         </div>
                     </div>
                     <div class="task-actions">
-                        <button class="btn-action btn-done" onclick="toggleTask(${task.id})" title="Hoàn thành">
+                        <button class="btn-action btn-star ${task.starred ? 'active' : ''}" onclick="event.stopPropagation(); toggleStar(${task.id})" title="Ưu tiên">
+                            ${task.starred ? '★' : '☆'}
+                        </button>
+                        <button class="btn-action btn-done" onclick="event.stopPropagation(); toggleTask(${task.id})" title="Hoàn thành">
                             ✓
                         </button>
-                        <button class="btn-action btn-delete" onclick="deleteTask(${task.id})" title="Xóa">
+                        <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteTask(${task.id})" title="Xóa">
                             ✕
                         </button>
                     </div>
                 `;
                 list.appendChild(card);
             });
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = tasks.length;
+            const done = tasks.filter(t => t.completed).length;
+            const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-done').textContent = done;
+            document.getElementById('stat-percent').textContent = `${percent}%`;
+            document.getElementById('main-progress').style.width = `${percent}%`;
         }
 
         function updateLiveTime() {
@@ -448,9 +1920,85 @@
 
             document.getElementById('live-clock').textContent = timeStr;
             document.getElementById('live-date').textContent = dateStr;
+
+            // Update Greeting
+            const hour = now.getHours();
+            let greeting = "";
+            if (hour >= 5 && hour < 12) greeting = "🌅 Chào buổi sáng rạng rỡ";
+            else if (hour >= 12 && hour < 18) greeting = "☀️ Chào buổi chiều năng lượng";
+            else if (hour >= 18 && hour < 22) greeting = "🌙 Chào buổi tối bình yên";
+            else greeting = "🌌 Làm việc khuya rồi, nghỉ ngơi thôi";
+            document.getElementById('greeting-text').textContent = greeting;
+        }
+
+        const quotes = [
+            "Hành trình vạn dặm bắt đầu từ một bước chân.",
+            "Thành công là kết quả của sự chuẩn bị mỗi ngày.",
+            "Hãy làm việc khi người khác đang ngủ.",
+            "Hôm nay chăm chỉ, mai này thênh thang.",
+            "Kiến thức là sức mạnh, thực hành là chìa khóa."
+        ];
+
+        function rotateQuote() {
+            const display = document.getElementById('quote-display');
+            display.style.opacity = 0;
+            setTimeout(() => {
+                display.textContent = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+                display.style.opacity = 0.8;
+            }, 500);
+        }
+
+        function showModal(id) {
+            const task = tasks.find(t => t.id === id);
+            const body = document.getElementById('modal-body');
+            body.innerHTML = `
+                <h2 style="margin-bottom: 1rem; color: var(--accent);">${task.name}</h2>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    <span>Môn: ${task.subject}</span>
+                    <span>Hạn: ${task.date} ${task.time ? `-${task.time}` : ''}</span>
+                </div>
+                ${task.image ? `<img src="${task.image}" style="width: 100%; border-radius: 1rem; margin-bottom: 1.5rem; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">` : ''}
+                <p style="white-space: pre-wrap; line-height: 1.6; color: var(--text-main); font-size: 1.1rem;">${task.content || "Không có nội dung chi tiết."}</p>
+            `;
+            document.getElementById('taskModal').style.display = 'flex';
+            playSound('click');
+        }
+
+        function closeModal() {
+            document.getElementById('taskModal').style.display = 'none';
+        }
+
+        function closeWelcome() {
+            playSound('success');
+            const overlay = document.getElementById('welcomeOverlay');
+            overlay.style.opacity = '0';
+            overlay.style.pointerEvents = 'none';
+            sessionStorage.setItem('welcomeShown', 'true');
+            setTimeout(() => overlay.style.display = 'none', 800);
+        }
+
+        function checkWelcome() {
+            if (!sessionStorage.getItem('welcomeShown')) {
+                document.getElementById('welcomeOverlay').style.display = 'flex';
+            }
+        }
+
+        function switchTab(tabId) {
+            // ...
+            playSound('click');
+            // Gỡ active khỏi các nút
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            // Gỡ active khỏi các nội dung
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Active nút hiện tại
+            event.currentTarget.classList.add('active');
+            // Hiển thị tab content
+            document.getElementById(tabId + '-tab').classList.add('active');
         }
 
         function setDefaultDate() {
+            // ...
             const now = new Date();
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -458,11 +2006,52 @@
             document.getElementById('dueDate').value = `${year}-${month}-${day}`;
         }
 
+        // Particles VIP
+        setTimeout(() => {
+            particlesJS("particles-js", {
+                "particles": {
+                    "number": { "value": 80 },
+                    "color": { "value": "#6366f1" },
+                    "shape": { "type": "circle" },
+                    "opacity": { "value": 0.3 },
+                    "size": { "value": 3 },
+                    "line_linked": { "enable": true, "distance": 150, "color": "#6366f1", "opacity": 0.2, "width": 1 },
+                    "move": { "enable": true, "speed": 2 }
+                },
+                "interactivity": {
+                    "events": { "onhover": { "enable": true, "mode": "grab" } }
+                }
+            });
+        }, 500);
+
+        // Hiệu ứng di chuột nền chuyển động (Tối ưu hóa bằng requestAnimationFrame)
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            targetX = (e.clientX - window.innerWidth / 2) * 0.015;
+            targetY = (e.clientY - window.innerHeight / 2) * 0.015;
+        });
+
+        function animateBG() {
+            mouseX += (targetX - mouseX) * 0.1;
+            mouseY += (targetY - mouseY) * 0.1;
+            const bg = document.getElementById('bgLayer');
+            if (bg) bg.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+            requestAnimationFrame(animateBG);
+        }
+        animateBG();
+
         // Khởi tạo ban đầu
+        const savedTheme = localStorage.getItem('hw_theme');
+        if (savedTheme) setTheme(savedTheme);
+
         setInterval(updateLiveTime, 1000);
+        setInterval(rotateQuote, 10000);
         updateLiveTime();
         setDefaultDate();
-        renderTasks();
+        checkWelcome();
+        initApp();
     </script>
 </body>
 
