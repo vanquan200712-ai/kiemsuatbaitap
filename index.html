@@ -8,6 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --bg-color: #050505;
@@ -1395,6 +1399,19 @@
     </div>
 
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXYKwDn5awzJE1y443GB7NnoaJoq-aip4",
+            authDomain: "myhomeworkmanager-a3c45.firebaseapp.com",
+            projectId: "myhomeworkmanager-a3c45",
+            storageBucket: "myhomeworkmanager-a3c45.firebasestorage.app",
+            messagingSenderId: "947176303934",
+            appId: "1:947176303934:web:5d62b4f00700c85813506f",
+            measurementId: "G-EW8NRVPTGF"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         // Authentication Logic
         let users = JSON.parse(localStorage.getItem('hw_users')) || [];
 
@@ -1579,7 +1596,7 @@
             location.reload();
         }
 
-        function initApp() {
+        async function initApp() {
             if (!currentUser) {
                 document.getElementById('authPortal').style.display = 'flex';
                 document.getElementById('loginForm').style.display = 'block';
@@ -1592,6 +1609,20 @@
                 document.getElementById('userHeader').style.display = 'flex';
                 document.getElementById('headerUsername').textContent = currentUser;
                 document.getElementById('userAvatar').textContent = currentUser[0].toUpperCase();
+
+                // Cloud Load
+                if (typeof db !== 'undefined') {
+                    try {
+                        const doc = await db.collection('user_tasks').doc(currentUser).get();
+                        if (doc.exists) {
+                            tasks = doc.data().tasks || [];
+                            localStorage.setItem('hw_tasks', JSON.stringify(tasks));
+                            console.log("Cloud Data Loaded for:", currentUser);
+                        }
+                    } catch (e) {
+                        console.error("Cloud Load Error:", e);
+                    }
+                }
 
                 // Admin specific logic
                 const userObj = users.find(u => u.username === currentUser);
@@ -1744,9 +1775,22 @@
         }
         let tasks = JSON.parse(localStorage.getItem('hw_tasks')) || [];
 
-        function saveAndRender() {
+        async function saveAndRender() {
             localStorage.setItem('hw_tasks', JSON.stringify(tasks));
             renderTasks();
+
+            // Cloud Sync
+            if (currentUser && typeof db !== 'undefined') {
+                try {
+                    await db.collection('user_tasks').doc(currentUser).set({
+                        tasks: tasks,
+                        lastSync: new Date().toISOString()
+                    });
+                    console.log("Cloud Sync Success");
+                } catch (e) {
+                    console.error("Cloud Sync Error:", e);
+                }
+            }
         }
 
         function addTask() {
