@@ -2439,11 +2439,30 @@
             toggleAuth('login');
         }
 
-        function handleLogin() {
+        async function handleLogin() {
             const user = document.getElementById('loginUser').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
 
-            const found = users.find(u => u.username === user && u.password === pass);
+            // 1. Kiểm tra Local trước
+            let found = users.find(u => u.username === user && u.password === pass);
+
+            // 2. Nếu không thấy, tra cứu trên Cloud (Quan trọng cho việc đăng nhập máy khác)
+            if (!found && typeof db !== 'undefined') {
+                try {
+                    const doc = await db.collection('users_profiles').doc(user).get();
+                    if (doc.exists && doc.data().password === pass) {
+                        found = doc.data();
+                        // Lưu lại Local để lần sau nhanh hơn
+                        if (!users.find(u => u.username === user)) {
+                            users.push(found);
+                            localStorage.setItem('hw_users', JSON.stringify(users));
+                        }
+                    }
+                } catch (e) {
+                    console.error("Cloud Auth Error:", e);
+                }
+            }
+
             if (found) {
                 // Bước xác thực 2 lớp giả lập
                 playSound('success');
@@ -2455,7 +2474,7 @@
                 document.getElementById('verifyForm').style.display = 'block';
                 document.getElementById('verifyMsg').innerHTML = `Mã bảo mật đã được gửi tới:<br><strong style="color:var(--accent)">${found.email}</strong><br>(Mã demo: <span style="cursor:pointer" onclick="showOTPModal('Mã xác thực của bạn là: <strong style=\\'font-size: 1.5rem; color: var(--accent); display: block; margin-top: 10px;\\'>' + currentOTP + '</strong>')">${currentOTP}</span>)`;
 
-                // Cloud Sync for existing users who might only be local
+                // Cloud Sync ngược lại (nếu cần cập nhật thông tin)
                 if (typeof db !== 'undefined') {
                     db.collection('users_profiles').doc(user).set(found).catch(e => console.error("Sync on Login error", e));
                 }
@@ -2550,17 +2569,19 @@
                             if (typeof db !== 'undefined') {
                                 try {
                                     const snapshot = await db.collection('users_profiles').get();
-                                    const globalUsers = [];
-                                    snapshot.forEach(doc => globalUsers.push(doc.data()));
+                                    const cloudUsersList = [];
+                                    snapshot.forEach(doc => cloudUsersList.push(doc.data()));
 
-                                    if (globalUsers.length > 0) {
-                                        // Merge global users into local users for current session
-                                        globalUsers.forEach(gu => {
-                                            if (!users.find(u => u.username === gu.username)) {
+                                    if (cloudUsersList.length > 0) {
+                                        cloudUsersList.forEach(gu => {
+                                            const existingIdx = users.findIndex(u => u.username === gu.username);
+                                            if (existingIdx === -1) {
                                                 users.push(gu);
+                                            } else {
+                                                // Update existing with cloud data
+                                                users[existingIdx] = gu;
                                             }
                                         });
-                                        // Preserve local edits but prioritize cloud list
                                         localStorage.setItem('hw_users', JSON.stringify(users));
                                     }
                                     renderUsers();
@@ -2575,6 +2596,7 @@
                             document.getElementById('adminTabBtn').style.display = 'none';
                         }
 
+                        renderTasks();
                     } catch (e) {
                         console.error("Cloud Load Error:", e);
                     }
