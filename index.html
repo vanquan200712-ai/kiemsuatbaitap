@@ -1791,13 +1791,18 @@
                     <input type="text" id="settingsDisplayName" placeholder="Nhập tên mới..." />
                 </div>
 
-                <div class="settings-form-group has-description">
+                <div class="settings-form-group">
                     <label>Avatar (Link ảnh)</label>
+                    <input type="text" id="settingsAvatarUrl" placeholder="https://link-anh-dai-dien.png" />
+                </div>
+
+                <div class="settings-form-group has-description">
+                    <label>Hình Nền (Link ảnh)</label>
                     <div style="display: flex; flex-direction: column; width: 100%;">
-                        <input type="text" id="settingsAvatarUrl" placeholder="https://example.com/avatar.png" />
+                        <input type="text" id="settingsBgUrl" placeholder="https://link-anh-nen.jpg" />
                         <small
                             style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.7;">
-                            Để trống để dùng chữ cái đầu
+                            Dán link ảnh (JPG/PNG) để đổi hình nền trang web. Để trống để dùng mặc định.
                         </small>
                     </div>
                 </div>
@@ -3202,6 +3207,7 @@
             // Pre-fill current values
             document.getElementById('settingsDisplayName').value = user.displayName || user.username;
             document.getElementById('settingsAvatarUrl').value = user.avatarUrl || '';
+            document.getElementById('settingsBgUrl').value = user.bgUrl || '';
 
             // Clear password fields
             document.getElementById('settingsOldPassword').value = '';
@@ -3230,12 +3236,14 @@
 
             const newName = document.getElementById('settingsDisplayName').value.trim();
             const newAvatarUrl = document.getElementById('settingsAvatarUrl').value.trim();
+            const newBgUrl = document.getElementById('settingsBgUrl').value.trim();
 
             if (!newName) return showOTPModal("❌ Tên hiển thị không được để trống!", "⚠️ Lỗi");
 
             // Cập nhật thông tin nòng cốt
             users[userIndex].displayName = newName;
             users[userIndex].avatarUrl = newAvatarUrl;
+            users[userIndex].bgUrl = newBgUrl;
 
             // Lưu vĩnh viễn vào LocalStorage
             localStorage.setItem('hw_users', JSON.stringify(users));
@@ -3299,10 +3307,12 @@
 
             const displayName = user.displayName || user.username;
             const avatarUrl = user.avatarUrl;
+            const bgUrl = user.bgUrl;
 
             // Update header
             document.getElementById('headerUsername').textContent = displayName;
 
+            // Update Avatar
             const avatarEl = document.getElementById('userAvatar');
             if (avatarUrl) {
                 avatarEl.style.backgroundImage = `url('${avatarUrl}')`;
@@ -3312,6 +3322,20 @@
             } else {
                 avatarEl.style.backgroundImage = 'none';
                 avatarEl.textContent = displayName.charAt(0).toUpperCase();
+            }
+
+            // Update Background Persistent
+            const bgLayer = document.getElementById('bgLayer');
+            if (bgLayer) {
+                if (bgUrl) {
+                    bgLayer.style.backgroundImage = `url('${bgUrl}')`;
+                    bgLayer.style.display = 'block';
+                    bgLayer.style.opacity = '1';
+                } else {
+                    bgLayer.style.backgroundImage = "url('background.jpg')";
+                    bgLayer.style.display = 'block';
+                    bgLayer.style.opacity = '0.3'; // Mặc định để nhìn mờ mờ cho đẹp
+                }
             }
         }
 
