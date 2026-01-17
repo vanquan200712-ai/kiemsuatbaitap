@@ -2365,25 +2365,37 @@
             else if (mode === 'login') document.getElementById('loginForm').style.display = 'block';
         }
 
-        function handleRegister() {
+        async function handleRegister() {
             const user = document.getElementById('regUser').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPass').value.trim();
             const confirmPass = document.getElementById('regConfirmPass').value.trim();
 
             if (!user || !email || !pass || !confirmPass) return alert("Vui lòng nhập đủ các trường thông tin!");
-
             if (pass !== confirmPass) return alert("❌ Mật khẩu xác nhận không trùng khớp!");
-
             if (users.find(u => u.username === user)) return alert("Tên tài khoản này đã có người dùng!");
 
-            users.push({
+            const newUser = {
                 username: user,
                 password: pass,
                 email: email,
-                role: 'user'
-            }); // Default role to 'user'
+                role: 'user',
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
             localStorage.setItem('hw_users', JSON.stringify(users));
+
+            // Cloud Sync for User Profiles
+            if (typeof db !== 'undefined') {
+                try {
+                    await db.collection('users_profiles').doc(user).set(newUser);
+                    console.log("☁️ User Account Synced to Cloud:", user);
+                } catch (e) {
+                    console.error("❌ Cloud Register Error:", e);
+                }
+            }
+
             playSound('success');
             showOTPModal("✨ Đăng ký thành công! Hãy dùng tài khoản này để đăng nhập.", "🎉 Chúc Mừng");
             toggleAuth('login');
@@ -2442,6 +2454,11 @@
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('verifyForm').style.display = 'block';
                 document.getElementById('verifyMsg').innerHTML = `Mã bảo mật đã được gửi tới:<br><strong style="color:var(--accent)">${found.email}</strong><br>(Mã demo: <span style="cursor:pointer" onclick="showOTPModal('Mã xác thực của bạn là: <strong style=\\'font-size: 1.5rem; color: var(--accent); display: block; margin-top: 10px;\\'>' + currentOTP + '</strong>')">${currentOTP}</span>)`;
+
+                // Cloud Sync for existing users who might only be local
+                if (typeof db !== 'undefined') {
+                    db.collection('users_profiles').doc(user).set(found).catch(e => console.error("Sync on Login error", e));
+                }
 
                 showOTPModal(`Mã xác thực <strong>${currentOTP}</strong> đã được gửi đến email <strong>${found.email}</strong>.<br>Vui lòng kiểm tra và nhập mã để tiếp tục.`);
             } else {
@@ -2524,21 +2541,44 @@
                             renderTasks(); // Vẽ lại giao diện với dữ liệu mới từ mây
                             console.log("Cloud Data Synced for:", currentUser);
                         }
+                        // Admin specific logic
+                        const userObj = users.find(u => u.username === currentUser);
+                        if (userObj && userObj.role === 'admin') {
+                            document.getElementById('adminTabBtn').style.display = 'block';
+
+                            // Fetch Global User List if Admin
+                            if (typeof db !== 'undefined') {
+                                try {
+                                    const snapshot = await db.collection('users_profiles').get();
+                                    const globalUsers = [];
+                                    snapshot.forEach(doc => globalUsers.push(doc.data()));
+
+                                    if (globalUsers.length > 0) {
+                                        // Merge global users into local users for current session
+                                        globalUsers.forEach(gu => {
+                                            if (!users.find(u => u.username === gu.username)) {
+                                                users.push(gu);
+                                            }
+                                        });
+                                        // Preserve local edits but prioritize cloud list
+                                        localStorage.setItem('hw_users', JSON.stringify(users));
+                                    }
+                                    renderUsers();
+                                } catch (e) {
+                                    console.error("❌ Admin Cloud Fetch Error:", e);
+                                    renderUsers();
+                                }
+                            } else {
+                                renderUsers();
+                            }
+                        } else {
+                            document.getElementById('adminTabBtn').style.display = 'none';
+                        }
+
                     } catch (e) {
                         console.error("Cloud Load Error:", e);
                     }
                 }
-
-                // Admin specific logic
-                const userObj = users.find(u => u.username === currentUser);
-                if (userObj && userObj.role === 'admin') {
-                    document.getElementById('adminTabBtn').style.display = 'block';
-                    renderUsers();
-                } else {
-                    document.getElementById('adminTabBtn').style.display = 'none';
-                }
-
-                renderTasks();
             }
         }
 
@@ -2557,13 +2597,25 @@
             `).join('');
         }
 
-        function deleteUser(username) {
+        async function deleteUser(username) {
             if (confirm(`Bạn có chắc muốn xóa vĩnh viễn tài khoản "${username}" không?`)) {
                 playSound('delete');
+
+                // 1. Delete from Cloud
+                if (typeof db !== 'undefined') {
+                    try {
+                        await db.collection('users_profiles').doc(username).delete();
+                        console.log("☁️ User deleted from Cloud:", username);
+                    } catch (e) {
+                        console.error("❌ Cloud Delete User Error:", e);
+                    }
+                }
+
+                // 2. Delete from Local
                 users = users.filter(u => u.username !== username);
                 localStorage.setItem('hw_users', JSON.stringify(users));
                 renderUsers();
-                alert(`✅ Đã xóa tài khoản "${username}" thành công.`);
+                alert(`✅ Đã xóa tài khoản "${username}" thành công trên toàn hệ thống.`);
             }
         }
 
